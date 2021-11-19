@@ -1,6 +1,6 @@
 {
     "name": "schedule-pull-request-merge-action",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Schedule Pull Request Merge",
     "main": "dist/index.js",
     "scripts": {
