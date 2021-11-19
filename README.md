@@ -4,11 +4,9 @@ This action prints current server date
 
 ## Inputs
 
-## Outputs
+## `time_zone`
 
-## `time`
-
-The time we greeted you.
+Default `"UTC"`.
 
 ## Example usage
 
