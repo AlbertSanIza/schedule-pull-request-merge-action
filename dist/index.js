@@ -10,12 +10,14 @@ const github = __nccwpck_require__(5226)
 const pullRequest = async () => {
     console.log(`Started at: ${new Date().toISOString()}`)
     try {
-        const myToken = core.getInput('myToken')
-        const octokit = github.getOctokit(myToken)
+        const token = process.env['GITHUB_TOKEN']
+        const octokit = github.getOctokit(token)
         const payload = JSON.stringify(github.context.payload, undefined, 2)
         console.log(`The event payload: ${payload}`)
     } catch (error) {
         core.setFailed(error.message)
+    } finally {
+        console.log(`Ended at: ${new Date().toISOString()}`)
     }
 }
 
