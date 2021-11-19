@@ -1,6 +1,29 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 9951:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+module.exports = pullRequest
+
+const core = __nccwpck_require__(9559)
+const github = __nccwpck_require__(5226)
+
+const pullRequest = async () => {
+    console.log(`Started at: ${new Date().toISOString()}`)
+    try {
+        const myToken = core.getInput('myToken')
+        const octokit = github.getOctokit(myToken)
+        const payload = JSON.stringify(github.context.payload, undefined, 2)
+        console.log(`The event payload: ${payload}`)
+    } catch (error) {
+        core.setFailed(error.message)
+    }
+}
+
+
+/***/ }),
+
 /***/ 9681:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -8443,16 +8466,14 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(9559)
-const github = __nccwpck_require__(5226)
 
-try {
-    const time = new Date().toTimeString()
-    core.setOutput('time', time)
-    const payload = JSON.stringify(github.context.payload, undefined, 2)
-    console.log(`The event payload: ${payload}`)
-} catch (error) {
-    core.setFailed(error.message)
+const pullRequest = __nccwpck_require__(9951)
+
+async function run() {
+    pullRequest()
 }
+
+run()
 
 })();
 
