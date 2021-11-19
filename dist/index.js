@@ -7,17 +7,33 @@
 const core = __nccwpck_require__(9559)
 const github = __nccwpck_require__(5226)
 
+const hasSchedule = (test) => {
+    return /(^|\n)\/schedule /.test(text)
+}
+
 const pullRequest = async () => {
-    console.log(`Started at: ${new Date().toISOString()}`)
+    core.info(`Started at: ${new Date().toISOString()}`)
     try {
         const token = process.env['GITHUB_TOKEN']
         const octokit = github.getOctokit(token)
+
+        const firstPayload = JSON.stringify(process.env['GITHUB_EVENT_PATH'], undefined, 2)
+        console.log(firstPayload)
+
+        console.log('-------------------------------')
+        console.log('-------------------------------')
+        console.log('-------------------------------')
+
         const payload = JSON.stringify(github.context.payload, undefined, 2)
         console.log(`The event payload: ${payload}`)
+
+        if (!hasSchedule('')) {
+            core.info(`No /schedule command found`)
+        }
     } catch (error) {
         core.setFailed(error.message)
     } finally {
-        console.log(`Ended at: ${new Date().toISOString()}`)
+        core.info(`Ended at: ${new Date().toISOString()}`)
     }
 }
 
