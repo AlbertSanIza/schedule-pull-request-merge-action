@@ -4,8 +4,6 @@
 /***/ 9951:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-module.exports = pullRequest
-
 const core = __nccwpck_require__(9559)
 const github = __nccwpck_require__(5226)
 
@@ -20,6 +18,8 @@ const pullRequest = async () => {
         core.setFailed(error.message)
     }
 }
+
+module.exports = pullRequest
 
 
 /***/ }),
