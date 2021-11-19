@@ -1,5 +1,5 @@
 name: Schedule Pull Request Merge
-description: "Merge pull requests on a scheduled day"
+description: 'Merge pull requests on a scheduled day'
 runs:
-  using: "node12"
-  main: "index.js"
+    using: 'node12'
+    main: 'index.js'
