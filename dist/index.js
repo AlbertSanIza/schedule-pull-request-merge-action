@@ -15,6 +15,11 @@ const getScheduleDateTime = (text) => {
     return text.match(/(^|\n)\/schedule (.*)/).pop()
 }
 
+const isValidDate = (text) => {
+    const date = new Date(text)
+    return date instanceof Date && !isNaN(date)
+}
+
 const pullRequest = async () => {
     try {
         const token = process.env['GITHUB_TOKEN']
@@ -27,6 +32,11 @@ const pullRequest = async () => {
 
         const datestring = getScheduleDateTime(eventPayload.pull_request.body)
         core.info(`Schedule date found: "${datestring}"`)
+
+        if (!isValidDate(datestring)) {
+            core.info(`"${datestring}" is not a Valid Date`)
+            return
+        }
     } catch (error) {
         core.setFailed(error.message)
     }
