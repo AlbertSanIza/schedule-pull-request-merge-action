@@ -4,7 +4,6 @@ on:
         types:
             - opened
             - edited
-            - synchronize
 jobs:
     schedule_pull_request_merge:
         runs-on: ubuntu-latest
