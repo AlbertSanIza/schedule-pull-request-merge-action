@@ -1,0 +1,23 @@
+{
+  "name": "schedule-pull-request-merge-action",
+  "version": "1.0.0",
+  "description": "Schedule Pull Request Merge",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlbertSanIza/schedule-pull-request-merge-action.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlbertSanIza/schedule-pull-request-merge-action/issues"
+  },
+  "homepage": "https://github.com/AlbertSanIza/schedule-pull-request-merge-action#readme",
+  "dependencies": {
+    "@actions/core": "^1.6.0"
+  }
+}
