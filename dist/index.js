@@ -7,33 +7,28 @@
 const core = __nccwpck_require__(9559)
 const github = __nccwpck_require__(5226)
 
-const hasSchedule = (test) => {
+const hasSchedule = (text) => {
     return /(^|\n)\/schedule /.test(text)
 }
 
+const getScheduleDateTime = (text) => {
+    return text.match(/(^|\n)\/schedule (.*)/).pop()
+}
+
 const pullRequest = async () => {
-    core.info(`Started at: ${new Date().toISOString()}`)
     try {
         const token = process.env['GITHUB_TOKEN']
         const octokit = github.getOctokit(token)
 
-        const firstPayload = JSON.stringify(require(process.env['GITHUB_EVENT_PATH']), undefined, 2)
-        console.log(firstPayload)
-
-        console.log('-------------------------------')
-        console.log('-------------------------------')
-        console.log('-------------------------------')
-
-        const payload = JSON.stringify(github.context.payload, undefined, 2)
-        console.log(`The event payload: ${payload}`)
-
-        if (!hasSchedule('')) {
+        if (!hasSchedule(github.context.payload.pull_request.body)) {
             core.info(`No /schedule command found`)
+            return
         }
+
+        const datestring = getScheduleDateTime(eventPayload.pull_request.body)
+        core.info(`Schedule date found: "${datestring}"`)
     } catch (error) {
         core.setFailed(error.message)
-    } finally {
-        core.info(`Ended at: ${new Date().toISOString()}`)
     }
 }
 
@@ -8483,10 +8478,14 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
+const core = __nccwpck_require__(9559)
+
 const pullRequest = __nccwpck_require__(9951)
 
 async function run() {
+    core.info(`Started at: ${new Date().toISOString()}`)
     pullRequest()
+    core.info(`Ended at: ${new Date().toISOString()}`)
 }
 
 run()
