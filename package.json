@@ -1,6 +1,6 @@
 {
     "name": "schedule-pull-request-merge-action",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "Schedule Pull Request Merge",
     "scripts": {
         "build": "ncc build index.js -o dist --license licenses.txt",
