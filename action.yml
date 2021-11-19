@@ -3,3 +3,8 @@ description: 'Schedule Pull Request to Merge on a certain Date Time'
 runs:
     using: 'node12'
     main: 'dist/index.js'
+inputs:
+    time_zone:
+        description: 'Time Zone'
+        required: false
+        default: 'UTC'
