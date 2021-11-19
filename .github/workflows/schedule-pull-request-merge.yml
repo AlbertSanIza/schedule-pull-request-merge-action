@@ -1,5 +1,10 @@
 name: Schedule Pull Request Merge
-on: [push]
+on:
+    pull_request:
+        types:
+            - opened
+            - edited
+            - synchronize
 jobs:
     schedule_pull_request_merge:
         runs-on: ubuntu-latest
