@@ -4,6 +4,6 @@ jobs:
     schedule_pull_request_merge:
         runs-on: ubuntu-latest
         steps:
-            - uses: AlbertSanIza/schedule-pull-request-merge-action@v1.0.3
+            - uses: AlbertSanIza/schedule-pull-request-merge-action@v1.0.4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
