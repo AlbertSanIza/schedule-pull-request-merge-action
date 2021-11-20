@@ -1,11 +1,27 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 3328:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(9559)
+
+const localeDate = (date) => {
+    return new Date(date.toLocaleString('en-US', { timeZone: core.getInput('time_zone') }))
+}
+
+module.exports = localeDate
+
+
+/***/ }),
+
 /***/ 9951:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(9559)
 const github = __nccwpck_require__(5226)
+
+const localeDate = __nccwpck_require__(4364)
 
 const hasScheduleWithDate = (text) => {
     return /(^|\n)\/schedule /.test(text)
@@ -37,13 +53,15 @@ const pullRequest = async () => {
             return
         }
 
-        const datestring = getScheduleDateTime(eventPayload.pull_request.body)
-        core.info(`/schedule "${datestring}"`)
+        const datestring = getScheduleDateTime(github.context.payload.pull_request.body)
+        core.info(`/schedule ${datestring}`)
 
         if (!isValidDate(datestring)) {
             core.info(`"${datestring}" is not a Valid Date`)
             return
         }
+
+        core.info(`/schedule ${localeDate(new Date(datestring))} on ${core.getInput('time_zone')} Timezone`)
 
         core.info(`We can proceed!`)
     } catch (error) {
@@ -8328,6 +8346,14 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 4364:
+/***/ ((module) => {
+
+module.exports = eval("require")("./lib/locale.js");
+
+
+/***/ }),
+
 /***/ 2828:
 /***/ ((module) => {
 
@@ -8500,11 +8526,13 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(9559)
 
 const pullRequest = __nccwpck_require__(9951)
+const localeDate = __nccwpck_require__(3328)
 
 async function run() {
-    core.info(`Started at: ${new Date().toISOString()}`)
+    core.info(`Timezone: ${core.getInput('time_zone')}`)
+    core.info(`Started at: ${localeDate(new Date())}`)
     pullRequest()
-    core.info(`Ended at: ${new Date().toISOString()}`)
+    core.info(`Ended at: ${localeDate(new Date())}`)
 }
 
 run()
