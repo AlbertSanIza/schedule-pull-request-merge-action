@@ -125,6 +125,8 @@ const isValidDate = (text) => {
 }
 
 const isFork = (pullRequest) => {
+    console.log('----------------------')
+    console.log(JSON.stringify(pullRequest.head))
     return !!pullRequest.head.repo.fork
 }
 
@@ -141,19 +143,20 @@ const schedule = async () => {
             repo,
             state: 'open'
         })
-        console.log('----------------------')
-        console.log({
-            owner,
-            repo,
-            state: 'open'
-        })
-        console.log(pullRequests)
-        console.log('----------------------')
 
         pullRequests = pullRequests.data
             .filter((pullRequest) => {
+                console.log('----------------------')
+                console.log('----------------------')
+                console.log(pullRequests)
+                console.log('----------------------')
+                console.log('hasScheduleWithDate(pullRequest.body)', hasScheduleWithDate(pullRequest.body))
+                console.log('----------------------')
                 if (hasScheduleWithDate(pullRequest.body)) {
                     const dateString = getScheduleDateTime(pullRequest.body)
+                    console.log('dateString', dateString)
+                    console.log('----------------------')
+                    console.log('isValidDate(dateString)', isValidDate(dateString))
                     return isValidDate(dateString)
                 }
                 return false
