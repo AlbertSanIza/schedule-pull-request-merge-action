@@ -51,7 +51,7 @@ const pullRequest = async () => {
             return
         }
 
-        if (!!github.context.payload.pull_request.head.repo.fork) {
+        if (github.context.payload.pull_request.head.repo.fork) {
             core.setFailed(`This Action is Not Allowed in Forks`)
             return
         }
@@ -125,9 +125,7 @@ const isValidDate = (text) => {
 }
 
 const isFork = (pullRequest) => {
-    console.log('----------------------')
-    console.log(JSON.stringify(pullRequest.head))
-    return !!pullRequest.head.repo.fork
+    return pullRequest.head.repo.fork
 }
 
 const schedule = async () => {
@@ -146,17 +144,8 @@ const schedule = async () => {
 
         pullRequests = pullRequests.data
             .filter((pullRequest) => {
-                console.log('----------------------')
-                console.log('----------------------')
-                console.log(pullRequests)
-                console.log('----------------------')
-                console.log('hasScheduleWithDate(pullRequest.body)', hasScheduleWithDate(pullRequest.body))
-                console.log('----------------------')
                 if (hasScheduleWithDate(pullRequest.body)) {
                     const dateString = getScheduleDateTime(pullRequest.body)
-                    console.log('dateString', dateString)
-                    console.log('----------------------')
-                    console.log('isValidDate(dateString)', isValidDate(dateString))
                     return isValidDate(dateString)
                 }
                 return false
@@ -8701,10 +8690,10 @@ async function run() {
     core.info(`GitHub Event Name: ${process.env.GITHUB_EVENT_NAME}`)
     if (process.env.GITHUB_EVENT_NAME === 'pull_request') {
         core.info('Handle Pull Request Action')
-        pullRequest()
+        await pullRequest()
     } else {
         core.info('Handle Schedule Action')
-        schedule()
+        await schedule()
     }
     core.info(`Ended at: ${localeDate(new Date())}`)
 }
