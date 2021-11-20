@@ -10,10 +10,10 @@ async function run() {
     core.info(`GitHub Event Name: ${process.env.GITHUB_EVENT_NAME}`)
     if (process.env.GITHUB_EVENT_NAME === 'pull_request') {
         core.info('Handle Pull Request Action')
-        pullRequest()
+        await pullRequest()
     } else {
         core.info('Handle Schedule Action')
-        schedule()
+        await schedule()
     }
     core.info(`Ended at: ${localeDate(new Date())}`)
 }
