@@ -46,6 +46,16 @@ const pullRequest = async () => {
             return
         }
 
+        if (github.context.payload.pull_request.state !== 'open') {
+            core.info(`Pull Request Already Closed`)
+            return
+        }
+
+        if (!!github.context.payload.pull_request.head.repo.fork) {
+            core.setFailed(`This Action is Not Allowed in Forks`)
+            return
+        }
+
         core.info(`Handling Pull Request Action "${github.context.payload.action}", for ${github.context.payload.pull_request.html_url}`)
 
         if (!hasScheduleWithDate(github.context.payload.pull_request.body)) {
@@ -53,15 +63,15 @@ const pullRequest = async () => {
             return
         }
 
-        const datestring = getScheduleDateTime(github.context.payload.pull_request.body)
-        core.info(`/schedule ${datestring}`)
+        const dateString = getScheduleDateTime(github.context.payload.pull_request.body)
+        core.info(`/schedule ${dateString}`)
 
-        if (!isValidDate(datestring)) {
-            core.info(`"${datestring}" is not a Valid Date`)
+        if (!isValidDate(dateString)) {
+            core.info(`"${dateString}" is not a Valid Date`)
             return
         }
 
-        const scheduledDate = localeDate(new Date(datestring))
+        const scheduledDate = localeDate(new Date(dateString))
 
         core.info(`/schedule ${scheduledDate} on ${core.getInput('time_zone')} Timezone`)
 
@@ -99,12 +109,123 @@ module.exports = pullRequest
 const core = __nccwpck_require__(9559)
 const github = __nccwpck_require__(5226)
 
+const localeDate = __nccwpck_require__(3328)
+
+const hasScheduleWithDate = (text) => {
+    return /(^|\n)\/schedule /.test(text)
+}
+
+const getScheduleDateTime = (text) => {
+    return text.match(/(^|\n)\/schedule (.*)/).pop()
+}
+
+const isValidDate = (text) => {
+    const date = new Date(text)
+    return date instanceof Date && !isNaN(date)
+}
+
+const isFork = (pullRequest) => {
+    return !!pullRequest.head.repo.fork
+}
+
 const schedule = async () => {
     try {
         const token = process.env['GITHUB_TOKEN']
         const octokit = github.getOctokit(token)
 
         core.info(`Loading Open Pull Requests`)
+
+        const pullRequests = await octokit.rest.paginate(
+            'GET /repos/:owner/:repo/pulls',
+            {
+                owner: github.context.payload.repository.owner.login,
+                repo: github.context.payload.repository.name,
+                state: 'open'
+            },
+            (response) => {
+                return response.data
+                    .filter((pullRequest) => {
+                        if (hasScheduleWithDate(pullRequest.body)) {
+                            const dateString = getScheduleDateTime(pullRequest.body)
+                            return isValidDate(dateString)
+                        }
+                        return false
+                    })
+                    .filter((pullRequest) => isFork(pullRequest))
+                    .map((pullRequest) => {
+                        const dateString = getScheduleDateTime(pullRequest.body)
+                        return {
+                            scheduledDate: dateString,
+                            ref: pullRequest.head.sha,
+                            number: pullRequest.number,
+                            headSha: pullRequest.head.sha,
+                            html_url: pullRequest.html_url
+                        }
+                    })
+            }
+        )
+
+        if (pullRequests.length === 0) {
+            core.info('No Scheduled Pull Requests Found')
+            return
+        }
+
+        core.info(`${pullRequests.length} Scheduled Pull Requests Found:`)
+        pullRequests.forEach((pullRequest) => {
+            core.info(`Pull Request #${pullRequest.number}`)
+            core.info(`Scheduled Date: ${localeDate(new Date(pullRequest.scheduledDate))}`)
+        })
+
+        const duePullRequests = pullRequests.filter((pullRequest) => {
+            return localeDate(new Date(pullRequest.scheduledDate)) < localeDate(new Date())
+        })
+
+        if (duePullRequests.length === 0) {
+            core.info('No Scheduled Pull Requests are Due at this Moment')
+            return
+        }
+
+        core.info(`${duePullRequests.length} Pull Requests are Due:`)
+        pullRequests.forEach((pullRequest) => {
+            core.info(`Pull Request #${pullRequest.number}`)
+            core.info(`Scheduled Date: ${localeDate(new Date(pullRequest.scheduledDate))}`)
+        })
+
+        for await (const pullRequest of duePullRequests) {
+            await octokit.rest.pulls.merge({
+                owner: github.context.payload.repository.owner.login,
+                repo: github.context.payload.repository.name,
+                pull_number: pullRequest.number,
+                merge_method: mergeMethod
+            })
+
+            const checkRuns = await octokit.rest.paginate(octokit.checks.listForRef, {
+                owner: github.context.payload.repository.owner.login,
+                repo: github.context.payload.repository.name,
+                ref: pullRequest.ref
+            })
+
+            const checkRun = checkRuns.pop()
+
+            if (!checkRun) {
+                continue
+            }
+
+            await octokit.rest.checks.update({
+                check_run_id: checkRun.id,
+                owner: github.context.payload.repository.owner.login,
+                repo: github.context.payload.repository.name,
+                name: 'Merge Schedule',
+                head_sha: pullRequest.headSha,
+                conclusion: 'success',
+                output: {
+                    title: `Scheduled on ${localeDate(new Date(pullRequest.scheduledDate))}`,
+                    summary: 'Merged successfully'
+                }
+            })
+
+            core.info(`${pullRequest.html_url} Merged`)
+        }
     } catch (error) {
         core.setFailed(error.message)
     }
