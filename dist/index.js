@@ -61,15 +61,56 @@ const pullRequest = async () => {
             return
         }
 
-        core.info(`/schedule ${localeDate(new Date(datestring))} on ${core.getInput('time_zone')} Timezone`)
+        const scheduledDate = localeDate(new Date(datestring))
 
-        core.info(`We can proceed!`)
+        core.info(`/schedule ${scheduledDate} on ${core.getInput('time_zone')} Timezone`)
+
+        if (scheduledDate < localeDate(new Date())) {
+            core.info(`Scheduled Date is in the past`)
+            return
+        }
+
+        const { data } = await octokit.checks.create({
+            owner: github.context.payload.repository.owner.login,
+            repo: github.context.payload.repository.name,
+            name: 'Merge Schedule',
+            head_sha: github.context.payload.pull_request.head.sha,
+            status: 'in_progress',
+            output: {
+                title: `Scheduled to be Merged`,
+                summary: `Date: ${scheduledDate}`
+            }
+        })
+
+        core.info(`Check run created: ${data.html_url}`)
     } catch (error) {
         core.setFailed(error.message)
     }
 }
 
 module.exports = pullRequest
+
+
+/***/ }),
+
+/***/ 167:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(9559)
+const github = __nccwpck_require__(5226)
+
+const schedule = async () => {
+    try {
+        const token = process.env['GITHUB_TOKEN']
+        const octokit = github.getOctokit(token)
+
+        core.info(`Loading Open Pull Requests`)
+    } catch (error) {
+        core.setFailed(error.message)
+    }
+}
+
+module.exports = schedule
 
 
 /***/ }),
@@ -8519,11 +8560,18 @@ const core = __nccwpck_require__(9559)
 
 const pullRequest = __nccwpck_require__(9951)
 const localeDate = __nccwpck_require__(3328)
+const schedule = __nccwpck_require__(167)
 
 async function run() {
     core.info(`Timezone: ${core.getInput('time_zone')}`)
     core.info(`Started at: ${localeDate(new Date())}`)
-    pullRequest()
+    if (process.env.GITHUB_EVENT_NAME === 'pull_request') {
+        core.info('Handle Pull Request Action')
+        pullRequest()
+    } else {
+        core.info('Schedule Action')
+        schedule()
+    }
     core.info(`Ended at: ${localeDate(new Date())}`)
 }
 
