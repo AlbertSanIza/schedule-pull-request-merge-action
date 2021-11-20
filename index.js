@@ -7,6 +7,7 @@ const schedule = require('./lib/schedule.js')
 async function run() {
     core.info(`Timezone: ${core.getInput('time_zone')}`)
     core.info(`Started at: ${localeDate(new Date())}`)
+    core.info(`GitHub Event Name: ${process.env.GITHUB_EVENT_NAME}`)
     if (process.env.GITHUB_EVENT_NAME === 'pull_request') {
         core.info('Handle Pull Request Action')
         pullRequest()
