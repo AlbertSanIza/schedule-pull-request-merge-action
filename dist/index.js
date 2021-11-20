@@ -25,6 +25,13 @@ const pullRequest = async () => {
         const token = process.env['GITHUB_TOKEN']
         const octokit = github.getOctokit(token)
 
+        console.log(JSON.stringify(github.context.payload, null, 2))
+
+        if (!github.context.payload.pull_request) {
+            core.info(`Not a Pull Request`)
+            return
+        }
+
         if (!hasSchedule(github.context.payload.pull_request.body)) {
             core.info(`No /schedule command found`)
             return
@@ -37,6 +44,8 @@ const pullRequest = async () => {
             core.info(`"${datestring}" is not a Valid Date`)
             return
         }
+
+        core.info(`We can proceed!`)
     } catch (error) {
         core.setFailed(error.message)
     }
