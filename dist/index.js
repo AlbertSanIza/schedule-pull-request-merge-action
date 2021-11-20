@@ -70,7 +70,7 @@ const pullRequest = async () => {
             return
         }
 
-        const { data } = await octokit.checks.create({
+        const { data } = await octokit.rest.checks.create({
             owner: github.context.payload.repository.owner.login,
             repo: github.context.payload.repository.name,
             name: 'Merge Schedule',
