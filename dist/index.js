@@ -141,6 +141,14 @@ const schedule = async () => {
             repo,
             state: 'open'
         })
+        console.log('----------------------')
+        console.log({
+            owner,
+            repo,
+            state: 'open'
+        })
+        console.log(pullRequests)
+        console.log('----------------------')
 
         pullRequests = pullRequests.data
             .filter((pullRequest) => {
@@ -8692,7 +8700,7 @@ async function run() {
         core.info('Handle Pull Request Action')
         pullRequest()
     } else {
-        core.info('Schedule Action')
+        core.info('Handle Schedule Action')
         schedule()
     }
     core.info(`Ended at: ${localeDate(new Date())}`)
