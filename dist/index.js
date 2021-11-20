@@ -150,7 +150,7 @@ const schedule = async () => {
                 }
                 return false
             })
-            .filter((pullRequest) => isFork(pullRequest))
+            .filter((pullRequest) => !isFork(pullRequest))
             .map((pullRequest) => {
                 const dateString = getScheduleDateTime(pullRequest.body)
                 return {
