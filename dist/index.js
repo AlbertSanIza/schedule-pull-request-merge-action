@@ -215,6 +215,7 @@ const schedule = async () => {
             }
 
             for await (const checkRun of checkRuns.data.check_runs) {
+                core.info(`Check Run #${checkRun.id}`)
                 await octokit.rest.checks.update({
                     check_run_id: checkRun.id,
                     owner,
@@ -227,9 +228,8 @@ const schedule = async () => {
                         summary: 'Merged successfully'
                     }
                 })
+                core.info(`Cleared`)
             }
-
-            core.info(`Check Runs Cleared`)
         }
     } catch (error) {
         core.setFailed(error.message)
