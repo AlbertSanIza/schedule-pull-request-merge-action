@@ -21,7 +21,7 @@ module.exports = localeDate
 const core = __nccwpck_require__(9559)
 const github = __nccwpck_require__(5226)
 
-const localeDate = __nccwpck_require__(4364)
+const localeDate = __nccwpck_require__(3328)
 
 const hasScheduleWithDate = (text) => {
     return /(^|\n)\/schedule /.test(text)
@@ -8342,14 +8342,6 @@ function wrappy (fn, cb) {
     return ret
   }
 }
-
-
-/***/ }),
-
-/***/ 4364:
-/***/ ((module) => {
-
-module.exports = eval("require")("./lib/locale.js");
 
 
 /***/ }),
