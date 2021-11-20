@@ -82,7 +82,7 @@ const pullRequest = async () => {
             }
         })
 
-        core.info(`Check run created: ${data.html_url}`)
+        core.info(`Check Run Created: ${data.html_url}`)
     } catch (error) {
         core.setFailed(error.message)
     }
@@ -8565,6 +8565,7 @@ const schedule = __nccwpck_require__(167)
 async function run() {
     core.info(`Timezone: ${core.getInput('time_zone')}`)
     core.info(`Started at: ${localeDate(new Date())}`)
+    core.info(`GitHub Event Name: ${process.env.GITHUB_EVENT_NAME}`)
     if (process.env.GITHUB_EVENT_NAME === 'pull_request') {
         core.info('Handle Pull Request Action')
         pullRequest()
