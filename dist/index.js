@@ -132,14 +132,15 @@ const schedule = async () => {
     try {
         const token = process.env['GITHUB_TOKEN']
         const octokit = github.getOctokit(token)
+        const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
 
         core.info(`Loading Open Pull Requests`)
 
         const pullRequests = await octokit.rest.paginate(
             'GET /repos/:owner/:repo/pulls',
             {
-                owner: github.context.payload.repository.owner.login,
-                repo: github.context.payload.repository.name,
+                owner,
+                repo,
                 state: 'open'
             },
             (response) => {
@@ -193,38 +194,42 @@ const schedule = async () => {
 
         for await (const pullRequest of duePullRequests) {
             await octokit.rest.pulls.merge({
-                owner: github.context.payload.repository.owner.login,
-                repo: github.context.payload.repository.name,
+                owner,
+                repo,
                 pull_number: pullRequest.number,
                 merge_method: mergeMethod
             })
 
-            const checkRuns = await octokit.rest.paginate(octokit.checks.listForRef, {
-                owner: github.context.payload.repository.owner.login,
-                repo: github.context.payload.repository.name,
+            core.info(`${pullRequest.html_url} Merged`)
+
+            const checkRuns = await octokit.rest.checks.listForRef({
+                owner,
+                repo,
                 ref: pullRequest.ref
             })
 
-            const checkRun = checkRuns.pop()
+            core.info(`${checkRuns.data.total_count} Check Runs Found`)
 
-            if (!checkRun) {
+            if (checkRuns.data.total_count === 0) {
                 continue
             }
 
-            await octokit.rest.checks.update({
-                check_run_id: checkRun.id,
-                owner: github.context.payload.repository.owner.login,
-                repo: github.context.payload.repository.name,
-                name: 'Merge Schedule',
-                head_sha: pullRequest.headSha,
-                conclusion: 'success',
-                output: {
-                    title: `Scheduled on ${localeDate(new Date(pullRequest.scheduledDate))}`,
-                    summary: 'Merged successfully'
-                }
-            })
-
-            core.info(`${pullRequest.html_url} Merged`)
+            for await (const checkRun of checkRuns.data.check_runs) {
+                core.info(`Check Run #${checkRun.id}`)
+                await octokit.rest.checks.update({
+                    check_run_id: checkRun.id,
+                    owner,
+                    repo,
+                    name: 'Merge Schedule',
+                    head_sha: pullRequest.headSha,
+                    conclusion: 'success',
+                    output: {
+                        title: `Scheduled on ${localeDate(new Date(pullRequest.scheduledDate))}`,
+                        summary: 'Merged successfully'
+                    }
+                })
+                core.info(`Cleared`)
+            }
         }
     } catch (error) {
         core.setFailed(error.message)
